@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-06-12",
+  "description": "Browser Group Policy registry paths used by adware to force-install extensions, override homepages, and control search engines. These are set via HKLM\\SOFTWARE\\Policies and bypass the browser's own UI.",
+  "note": "IMPORTANT: Legitimate enterprise IT deployments also use these keys. JRTreborn only flags ExtensionInstallForcelist entries that match known malicious extension IDs, and Homepage/Search policy keys that are set without matching any known browser management software.",
+
+  "chrome_policy_root": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+  "chrome_policy_root_wow": "HKLM:\\SOFTWARE\\Wow6432Node\\Policies\\Google\\Chrome",
+  "edge_policy_root": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+  "edge_policy_root_wow": "HKLM:\\SOFTWARE\\Wow6432Node\\Policies\\Microsoft\\Edge",
+  "firefox_policy_root": "HKLM:\\SOFTWARE\\Policies\\Mozilla\\Firefox",
+
+  "suspicious_policy_values": [
+    {
+      "name": "Chrome Homepage Override",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "HomepageLocation",
+      "description": "Locks the Chrome homepage — commonly set by browser hijackers"
+    },
+    {
+      "name": "Chrome Homepage Override (Wow64)",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Policies\\Google\\Chrome",
+      "value": "HomepageLocation",
+      "description": "Locks the Chrome homepage (32-bit policy on 64-bit OS)"
+    },
+    {
+      "name": "Chrome New Tab Page Override",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "NewTabPageLocation",
+      "description": "Overrides the Chrome new tab page"
+    },
+    {
+      "name": "Chrome Search Provider URL",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "DefaultSearchProviderSearchURL",
+      "description": "Overrides the default search engine search URL"
+    },
+    {
+      "name": "Chrome Search Provider Name",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "DefaultSearchProviderName",
+      "description": "Overrides the default search engine name"
+    },
+    {
+      "name": "Chrome Restore On Startup",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "RestoreOnStartup",
+      "description": "Forces a specific page on startup (value 4 = open specific URLs)"
+    },
+    {
+      "name": "Edge Homepage Override",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      "value": "HomepageLocation",
+      "description": "Locks the Edge homepage"
+    },
+    {
+      "name": "Edge New Tab Page Override",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      "value": "NewTabPageLocation",
+      "description": "Overrides the Edge new tab page"
+    },
+    {
+      "name": "Edge Search Provider URL",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      "value": "DefaultSearchProviderSearchURL",
+      "description": "Overrides the default search engine in Edge"
+    },
+    {
+      "name": "Edge Restore On Startup",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      "value": "RestoreOnStartup",
+      "description": "Forces a specific page on startup in Edge"
+    }
+  ],
+
+  "force_install_extension_keys": [
+    {
+      "name": "Chrome Force-Install Extensions",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome\\ExtensionInstallForcelist",
+      "description": "Force-installed Chrome extensions — adware uses this to permanently install hijack extensions"
+    },
+    {
+      "name": "Chrome Force-Install Extensions (Wow64)",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Policies\\Google\\Chrome\\ExtensionInstallForcelist",
+      "description": "32-bit path for force-installed Chrome extensions"
+    },
+    {
+      "name": "Edge Force-Install Extensions",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge\\ExtensionInstallForcelist",
+      "description": "Force-installed Edge extensions"
+    },
+    {
+      "name": "Edge Force-Install Extensions (Wow64)",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Policies\\Microsoft\\Edge\\ExtensionInstallForcelist",
+      "description": "32-bit path for force-installed Edge extensions"
+    }
+  ],
+
+  "known_malicious_force_install_ids": [
+    "pnajkjljndmkejkipmfpgpneffmfciod",
+    "mbnfdpfbpbfmhnhgpmdoikonllhbmade",
+    "mgdmlgmmfpjodcndhdbofbaofmkbiolo",
+    "pjphgngicfomheakobeolikiddhhmkjf",
+    "mpooeipkngpakhgpbggmkeknoibnboob",
+    "jgflbndaadklilomaoindfmgljblfdfl",
+    "cjpglkicenollnjjkcdgokcfomhcghej",
+    "ncklbnnhfhmcfgbhampjmofhclcilkid",
+    "jifgokhocfpgpfebilnkgbfllebpbfcd",
+    "njohkacnlefdfkmhbgpnpcgadnefodha",
+    "cpbmeckbpgkpkogbclmbelifnpdfajej",
+    "ejdcnikecpjnfpikgcidmdalcceajhph",
+    "lnkbkkoimlacnphmkeoankheaejibfbm",
+    "ophjlpahpchlmihnnnihgmmeilfjmjjc",
+    "eoancbkfhcglkobbnmdmijfepbmpchol",
+    "oiigbmnaadbkfbmpbfijlflahbdbdgdf",
+    "igdhbblpcellaljokkpfhghconefdfdi",
+    "bepbmhgboaologfdajaanbcjmnhjmhfn",
+    "jcmlfbnmhcgijhcpfkbnbajjilpfhkmg",
+    "dpiekddnhfmpmdoopbpbmgfglglnknbj",
+    "fcnpecneicicncepohjcjadibbcdidha",
+    "flpcjncodpafbgdpnkljologafpionhb",
+    "dlnembnfbcpjnepmfjmngjenhhajpdfd",
+    "jadaiaonajphgnbamppeenldepoajijk",
+    "hphibigbodkkohogdniilkjmpiebgjmg",
+    "nahhmpbckpgdidfnmfkfgihlobieckfj",
+    "fmfnfnpmhclpjmeaamnniegceggkdnje",
+    "mljdojilelbbjdaodkhafbgamcpjbode",
+    "llkhdkbbioanlcckdofkagmcbhfleaih"
+  ]
+}

@@ -17,7 +17,8 @@ function Invoke-RemoveAll {
 
     # Order matters: kill processes first, then stop services, then remove everything else
     $order = @('Process', 'Service', 'Task', 'Program', 'RegistryKey', 'RegistryValue',
-                'Folder', 'File', 'StartupFile', 'BrowserHijack', 'BrowserExtension', 'IEBho')
+                'Folder', 'File', 'StartupFile', 'BrowserHijack', 'BrowserExtension', 'IEBho',
+                'PolicyExtension', 'PolicyOverride')
 
     foreach ($type in $order) {
         $items = $DetectedItems | Where-Object { $_.Type -eq $type }
@@ -51,6 +52,8 @@ function Remove-Item_Safe {
             'BrowserHijack'    { return Reset-BrowserHijack  -Item $Item -DryRun:$DryRun }
             'BrowserExtension' { return Remove-BrowserExt    -Item $Item -DryRun:$DryRun }
             'IEBho'            { return Remove-RegKey        -Item @{ Data = @{ path = $Item.Data; action = 'remove_key' }; Name = $Item.Name } -DryRun:$DryRun }
+            'PolicyExtension'  { return Remove-PolicyExtension -Item $Item -DryRun:$DryRun }
+            'PolicyOverride'   { return Remove-PolicyValue    -Item $Item -DryRun:$DryRun }
         }
     } catch {
         Write-LogEntry -Category 'ERROR' -Message "Failed to remove [$($Item.Type)] $($Item.Name): $($_.Exception.Message)"
@@ -266,8 +269,8 @@ function Remove-JunkFolder {
     } catch {
         Write-LogEntry -Category 'WARNING' -Message "Normal delete failed for '$path', trying forced removal..."
         try {
-            & takeown /F $path /R /D Y 2>&1 | Out-Null
-            & icacls $path /grant Administrators:F /T 2>&1 | Out-Null
+            & takeown /F "$path" /R /D Y 2>&1 | Out-Null
+            & icacls "$path" /grant Administrators:F /T 2>&1 | Out-Null
             Remove-Item -Path $path -Recurse -Force -ErrorAction Stop
             Write-LogEntry -Category 'REMOVED' -Message "Deleted folder (forced ownership): $path"
             return 'removed'
@@ -311,13 +314,26 @@ function Reset-BrowserHijack {
     }
 
     if ($data.Browser -eq 'Firefox') {
-        return Reset-FirefoxHijack -Item $Item
+        return Reset-FirefoxHijack -Item $Item -DryRun:$DryRun
     }
 
     # Chromium-based: edit Preferences JSON
     try {
         $prefsPath = $data.PrefsPath
         if (-not (Test-Path $prefsPath)) { return 'skipped' }
+
+        # Refuse to modify preferences while the browser is open — it would just be overwritten
+        # and we could race-corrupt the file.
+        $browserExe = switch ($data.Browser) {
+            'Google Chrome'  { 'chrome' }
+            'Microsoft Edge' { 'msedge' }
+            'Brave Browser'  { 'brave' }
+            default          { 'chrome' }
+        }
+        if (Get-Process -Name $browserExe -ErrorAction SilentlyContinue) {
+            Write-LogEntry -Category 'WARNING' -Message "$($data.Browser) is running. Close it and re-run to reset the homepage for profile: $($data.Profile)"
+            return 'skipped'
+        }
 
         $prefs = Get-Content -Path $prefsPath -Raw -ErrorAction Stop | ConvertFrom-Json
 
@@ -337,8 +353,12 @@ function Reset-BrowserHijack {
         }
 
         if ($changed) {
+            # Back up before writing — ConvertTo-Json round-trips are lossy on exotic Chrome prefs
+            $backupPath = "$prefsPath.jrtbackup"
+            Copy-Item -Path $prefsPath -Destination $backupPath -Force -ErrorAction SilentlyContinue
+
             $prefs | ConvertTo-Json -Depth 20 | Set-Content -Path $prefsPath -Encoding UTF8 -Force -ErrorAction Stop
-            Write-LogEntry -Category 'REMOVED' -Message "Reset browser homepage: $($data.Browser) / $($data.Profile)"
+            Write-LogEntry -Category 'REMOVED' -Message "Reset browser homepage: $($data.Browser) / $($data.Profile) (backup: $backupPath)"
             return 'removed'
         }
 
@@ -350,10 +370,15 @@ function Reset-BrowserHijack {
 }
 
 function Reset-FirefoxHijack {
-    param([hashtable]$Item)
+    param([hashtable]$Item, [switch]$DryRun)
 
     $data = $Item.Data
     $prefsPath = $data.PrefsPath
+
+    if ($DryRun) {
+        Write-LogEntry -Category 'INFO' -Message "[DryRun] Would reset Firefox homepage: $($data.Profile)"
+        return 'skipped'
+    }
 
     try {
         $lines = Get-Content -Path $prefsPath -ErrorAction Stop
@@ -374,6 +399,48 @@ function Reset-FirefoxHijack {
 }
 
 # ─── Browser Extension Removal ───────────────────────────────────────────────
+
+# ─── Browser Policy Removal ──────────────────────────────────────────────────
+
+function Remove-PolicyExtension {
+    param([hashtable]$Item, [switch]$DryRun)
+
+    $data = $Item.Data
+
+    if ($DryRun) {
+        Write-LogEntry -Category 'INFO' -Message "[DryRun] Would remove force-install policy for extension: $($data.ExtId)"
+        return 'skipped'
+    }
+
+    try {
+        Remove-ItemProperty -Path $data.RegPath -Name $data.ValueName -Force -ErrorAction Stop
+        Write-LogEntry -Category 'REMOVED' -Message "Removed force-install policy for extension: $($data.ExtId)"
+        return 'removed'
+    } catch {
+        Write-LogEntry -Category 'ERROR' -Message "Could not remove policy extension entry '$($data.ExtId)': $($_.Exception.Message)"
+        return 'error'
+    }
+}
+
+function Remove-PolicyValue {
+    param([hashtable]$Item, [switch]$DryRun)
+
+    $data = $Item.Data
+
+    if ($DryRun) {
+        Write-LogEntry -Category 'INFO' -Message "[DryRun] Would remove browser policy override: $($Item.Name)"
+        return 'skipped'
+    }
+
+    try {
+        Remove-ItemProperty -Path $data.RegPath -Name $data.ValueName -Force -ErrorAction Stop
+        Write-LogEntry -Category 'REMOVED' -Message "Removed browser policy override: $($Item.Name)"
+        return 'removed'
+    } catch {
+        Write-LogEntry -Category 'ERROR' -Message "Could not remove policy value '$($Item.Name)': $($_.Exception.Message)"
+        return 'error'
+    }
+}
 
 function Remove-BrowserExt {
     param([hashtable]$Item, [switch]$DryRun)
