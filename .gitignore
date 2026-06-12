@@ -1,0 +1,15 @@
+# Log and report output
+*.log
+*.html
+JRTreborn_*.log
+JRTreborn_*.html
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor
+.vscode/
+*.suo
+*.user

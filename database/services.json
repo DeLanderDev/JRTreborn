@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-06-12",
+  "description": "Windows services installed by adware and junkware",
+  "services": [
+    { "name": "CltMngSvc", "display": "Search Protect by Conduit", "description": "Conduit Search Protect Service" },
+    { "name": "SearchProtectionService", "display": "Search Protection Service", "description": "Generic search protection" },
+    { "name": "BitGuard", "display": "BitGuard", "description": "BitGuard browser protector" },
+    { "name": "BrowserDefendert", "display": "Browser Defender", "description": "PUP Browser Defender" },
+    { "name": "Wajam Internet Enhancer Service", "display": "Wajam Internet Enhancer", "description": "Wajam" },
+    { "name": "WajamUpdater", "display": "Wajam Updater", "description": "Wajam Updater Service" },
+    { "name": "DealPlyUpdate", "display": "DealPly Update Service", "description": "DealPly Updater" },
+    { "name": "SmartBar", "display": "SmartBar", "description": "Linkury SmartBar" },
+    { "name": "DataMngrSvc", "display": "DataManager Service", "description": "Bandoo/Searchqu DataManager" },
+    { "name": "IminentUpdate", "display": "Iminent Update", "description": "Iminent Updater" },
+    { "name": "RelevantKnowledge", "display": "RelevantKnowledge", "description": "TMRG RelevantKnowledge" },
+    { "name": "SuperFishLanScanner", "display": "SuperFish LAN Scanner", "description": "Superfish" },
+    { "name": "searchprovider", "display": "Search Provider", "description": "Generic browser hijack service" },
+    { "name": "DeltaSearchService", "display": "Delta Search Service", "description": "Delta Search" },
+    { "name": "TroviUpdaterService", "display": "Trovi Updater", "description": "Trovi updater" },
+    { "name": "CouponServerService", "display": "Coupon Server Service", "description": "Coupon Server adware" },
+    { "name": "BlockAndSurfService", "display": "Block and Surf Service", "description": "Block and Surf adware" },
+    { "name": "PriceMeterService", "display": "PriceMeter Service", "description": "PriceMeter adware" },
+    { "name": "BrowseFoxService", "display": "BrowseFox Service", "description": "BrowseFox adware" },
+    { "name": "DNSUnlockerService", "display": "DNSUnlocker Service", "description": "DNS Unlocker adware" },
+    { "name": "rlservice", "display": "RelevantKnowledge Service", "description": "RelevantKnowledge" },
+    { "name": "mywebsearchservice", "display": "My Web Search Service", "description": "MyWebSearch" },
+    { "name": "Yontoo Desktop", "display": "Yontoo Desktop", "description": "Yontoo Desktop Dock" },
+    { "name": "SlimUpdateService", "display": "Slim Update Service", "description": "SlimWare DriverUpdate" },
+    { "name": "DriverUpdateSvc", "display": "Driver Update Service", "description": "Driver Update" }
+  ]
+}

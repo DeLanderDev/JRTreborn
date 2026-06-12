@@ -1,0 +1,466 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-06-12",
+  "description": "Registry keys and values associated with known adware, junkware, and browser hijackers",
+  "keys": [
+    {
+      "name": "Ask Toolbar - HKLM Run",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "ApnUpdater",
+      "action": "remove_value"
+    },
+    {
+      "name": "Ask Toolbar - HKCU Run",
+      "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "ApnUpdater",
+      "action": "remove_value"
+    },
+    {
+      "name": "Babylon Toolbar - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Babylon",
+      "action": "remove_key"
+    },
+    {
+      "name": "Babylon Toolbar - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Babylon",
+      "action": "remove_key"
+    },
+    {
+      "name": "Conduit Search - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Conduit",
+      "action": "remove_key"
+    },
+    {
+      "name": "Conduit Search - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Conduit",
+      "action": "remove_key"
+    },
+    {
+      "name": "Search Protect - HKCU",
+      "path": "HKCU:\\SOFTWARE\\SearchProtect",
+      "action": "remove_key"
+    },
+    {
+      "name": "Search Protect - HKLM",
+      "path": "HKLM:\\SOFTWARE\\SearchProtect",
+      "action": "remove_key"
+    },
+    {
+      "name": "Delta Search - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Delta",
+      "action": "remove_key"
+    },
+    {
+      "name": "Delta Search - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Delta",
+      "action": "remove_key"
+    },
+    {
+      "name": "Wajam - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Wajam",
+      "action": "remove_key"
+    },
+    {
+      "name": "Wajam - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Wajam",
+      "action": "remove_key"
+    },
+    {
+      "name": "Snap.do - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Snap.do",
+      "action": "remove_key"
+    },
+    {
+      "name": "Trovi Search - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Trovi",
+      "action": "remove_key"
+    },
+    {
+      "name": "Trovi Search - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Trovi",
+      "action": "remove_key"
+    },
+    {
+      "name": "Superfish - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Superfish",
+      "action": "remove_key"
+    },
+    {
+      "name": "Yontoo - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Yontoo",
+      "action": "remove_key"
+    },
+    {
+      "name": "Yontoo - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Yontoo",
+      "action": "remove_key"
+    },
+    {
+      "name": "Sweetpacks - HKCU",
+      "path": "HKCU:\\SOFTWARE\\SweetIM",
+      "action": "remove_key"
+    },
+    {
+      "name": "Sweetpacks - HKLM",
+      "path": "HKLM:\\SOFTWARE\\SweetIM",
+      "action": "remove_key"
+    },
+    {
+      "name": "iLivid - HKCU",
+      "path": "HKCU:\\SOFTWARE\\iLivid",
+      "action": "remove_key"
+    },
+    {
+      "name": "Searchqu - HKCU",
+      "path": "HKCU:\\SOFTWARE\\DataMngr",
+      "action": "remove_key"
+    },
+    {
+      "name": "Searchqu - HKLM",
+      "path": "HKLM:\\SOFTWARE\\DataMngr",
+      "action": "remove_key"
+    },
+    {
+      "name": "Bandoo - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Bandoo",
+      "action": "remove_key"
+    },
+    {
+      "name": "MyWebSearch - HKLM",
+      "path": "HKLM:\\SOFTWARE\\FunWebProducts",
+      "action": "remove_key"
+    },
+    {
+      "name": "MyWebSearch - HKCU",
+      "path": "HKCU:\\SOFTWARE\\FunWebProducts",
+      "action": "remove_key"
+    },
+    {
+      "name": "MyWebSearch BHO - HKLM",
+      "path": "HKLM:\\SOFTWARE\\MyWebSearch",
+      "action": "remove_key"
+    },
+    {
+      "name": "Iminent - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Iminent",
+      "action": "remove_key"
+    },
+    {
+      "name": "Iminent - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Iminent",
+      "action": "remove_key"
+    },
+    {
+      "name": "Funmoods - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Funmoods",
+      "action": "remove_key"
+    },
+    {
+      "name": "Incredibar - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Incredibar",
+      "action": "remove_key"
+    },
+    {
+      "name": "Incredibar - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Incredibar",
+      "action": "remove_key"
+    },
+    {
+      "name": "Vosteran - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Vosteran",
+      "action": "remove_key"
+    },
+    {
+      "name": "Tuvaro - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Tuvaro",
+      "action": "remove_key"
+    },
+    {
+      "name": "Qone8 - HKCU",
+      "path": "HKCU:\\SOFTWARE\\qone8",
+      "action": "remove_key"
+    },
+    {
+      "name": "iStartSurf - HKCU",
+      "path": "HKCU:\\SOFTWARE\\iStartSurf",
+      "action": "remove_key"
+    },
+    {
+      "name": "DealPly - HKCU",
+      "path": "HKCU:\\SOFTWARE\\DealPly",
+      "action": "remove_key"
+    },
+    {
+      "name": "DealPly - HKLM",
+      "path": "HKLM:\\SOFTWARE\\DealPly",
+      "action": "remove_key"
+    },
+    {
+      "name": "Claro Search - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Claro LTD",
+      "action": "remove_key"
+    },
+    {
+      "name": "Claro Search - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Claro LTD",
+      "action": "remove_key"
+    },
+    {
+      "name": "Smartbar - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Smartbar",
+      "action": "remove_key"
+    },
+    {
+      "name": "Smartbar - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Smartbar",
+      "action": "remove_key"
+    },
+    {
+      "name": "RelevantKnowledge - HKLM",
+      "path": "HKLM:\\SOFTWARE\\RelevantKnowledge",
+      "action": "remove_key"
+    },
+    {
+      "name": "RelevantKnowledge - HKCU",
+      "path": "HKCU:\\SOFTWARE\\RelevantKnowledge",
+      "action": "remove_key"
+    },
+    {
+      "name": "OpenCandy - HKLM",
+      "path": "HKLM:\\SOFTWARE\\OpenCandy",
+      "action": "remove_key"
+    },
+    {
+      "name": "Spigot - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Spigot",
+      "action": "remove_key"
+    },
+    {
+      "name": "Spigot - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Spigot",
+      "action": "remove_key"
+    },
+    {
+      "name": "Value Apps - HKLM",
+      "path": "HKLM:\\SOFTWARE\\ValueApps",
+      "action": "remove_key"
+    },
+    {
+      "name": "WebCake - HKCU",
+      "path": "HKCU:\\SOFTWARE\\WebCake",
+      "action": "remove_key"
+    },
+    {
+      "name": "Linkey - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Linkey",
+      "action": "remove_key"
+    },
+    {
+      "name": "Linkey - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Linkey",
+      "action": "remove_key"
+    },
+    {
+      "name": "Nation Toolbar - HKCU",
+      "path": "HKCU:\\SOFTWARE\\NationZoom",
+      "action": "remove_key"
+    },
+    {
+      "name": "v9.com - HKCU",
+      "path": "HKCU:\\SOFTWARE\\v9.com",
+      "action": "remove_key"
+    },
+    {
+      "name": "DNSUnlocker - HKLM",
+      "path": "HKLM:\\SOFTWARE\\DNSUnlocker",
+      "action": "remove_key"
+    },
+    {
+      "name": "Browsefox - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Browsefox",
+      "action": "remove_key"
+    },
+    {
+      "name": "Coupon Server - HKLM",
+      "path": "HKLM:\\SOFTWARE\\CouponServer",
+      "action": "remove_key"
+    },
+    {
+      "name": "PriceMeter - HKLM",
+      "path": "HKLM:\\SOFTWARE\\PriceMeter",
+      "action": "remove_key"
+    },
+    {
+      "name": "Wajam Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "Wajam",
+      "action": "remove_value"
+    },
+    {
+      "name": "Babylon Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "BabylonToolbar",
+      "action": "remove_value"
+    },
+    {
+      "name": "Iminent Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "Iminent",
+      "action": "remove_value"
+    },
+    {
+      "name": "Search Protect Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "SearchProtect",
+      "action": "remove_value"
+    },
+    {
+      "name": "Search Protect Run - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "SearchProtect",
+      "action": "remove_value"
+    },
+    {
+      "name": "SweetIM Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "SweetIM",
+      "action": "remove_value"
+    },
+    {
+      "name": "Conduit Run - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "ConduitFloatingPlugin",
+      "action": "remove_value"
+    },
+    {
+      "name": "Smartbar Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "Smartbar",
+      "action": "remove_value"
+    },
+    {
+      "name": "DealPly Updater Run - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "DealPlyUpdate",
+      "action": "remove_value"
+    },
+    {
+      "name": "Snap.do Run - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "Snap.do",
+      "action": "remove_value"
+    },
+    {
+      "name": "hao123 Run - HKCU",
+      "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "hao123",
+      "action": "remove_value"
+    },
+    {
+      "name": "Browsefox Run - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "value": "Browsefox",
+      "action": "remove_value"
+    },
+    {
+      "name": "BlockAndSurf - HKLM",
+      "path": "HKLM:\\SOFTWARE\\BlockAndSurf",
+      "action": "remove_key"
+    },
+    {
+      "name": "Superfish Cert - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\SystemCertificates\\ROOT\\Certificates\\C864484869D41D2B0D32319C5A62F9315AAF2CBD",
+      "action": "remove_key",
+      "note": "Superfish/Komodia HTTPS interception root certificate"
+    },
+    {
+      "name": "Trovi Browser Helper - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects",
+      "value": "{8736C681-37A0-40C6-A0F0-4C083409151C}",
+      "action": "remove_value"
+    },
+    {
+      "name": "Conduit BHO - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects",
+      "value": "{30F9B915-B755-4826-820B-08FBA6BD249D}",
+      "action": "remove_value"
+    },
+    {
+      "name": "Ask Toolbar BHO - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects",
+      "value": "{D4027C7F-154A-4066-A1AD-4243D8127440}",
+      "action": "remove_value"
+    },
+    {
+      "name": "MyWebSearch BHO - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Browser Helper Objects",
+      "value": "{07B18EA1-A523-4961-B6BB-170DE4475CCA}",
+      "action": "remove_value"
+    },
+    {
+      "name": "WildTangent - HKLM",
+      "path": "HKLM:\\SOFTWARE\\WildTangent",
+      "action": "remove_key"
+    },
+    {
+      "name": "WildTangent - HKCU",
+      "path": "HKCU:\\SOFTWARE\\WildTangent",
+      "action": "remove_key"
+    },
+    {
+      "name": "Zango - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Zango",
+      "action": "remove_key"
+    },
+    {
+      "name": "Hotbar - HKLM",
+      "path": "HKLM:\\SOFTWARE\\Hotbar",
+      "action": "remove_key"
+    },
+    {
+      "name": "DealPly - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\DealPly",
+      "action": "remove_key"
+    },
+    {
+      "name": "Conduit - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Conduit",
+      "action": "remove_key"
+    },
+    {
+      "name": "Babylon - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Babylon",
+      "action": "remove_key"
+    },
+    {
+      "name": "Delta - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Delta",
+      "action": "remove_key"
+    },
+    {
+      "name": "Claro - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Claro LTD",
+      "action": "remove_key"
+    },
+    {
+      "name": "Incredibar - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Incredibar",
+      "action": "remove_key"
+    },
+    {
+      "name": "Wajam - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Wajam",
+      "action": "remove_key"
+    },
+    {
+      "name": "MyWebSearch - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\MyWebSearch",
+      "action": "remove_key"
+    },
+    {
+      "name": "Search Protect - HKLM Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\SearchProtect",
+      "action": "remove_key"
+    }
+  ]
+}
