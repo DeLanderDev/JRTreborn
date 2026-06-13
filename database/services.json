@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "updated": "2026-06-12",
   "description": "Windows services installed by adware and junkware",
   "services": [
@@ -27,6 +27,21 @@
     { "name": "mywebsearchservice", "display": "My Web Search Service", "description": "MyWebSearch" },
     { "name": "Yontoo Desktop", "display": "Yontoo Desktop", "description": "Yontoo Desktop Dock" },
     { "name": "SlimUpdateService", "display": "Slim Update Service", "description": "SlimWare DriverUpdate" },
-    { "name": "DriverUpdateSvc", "display": "Driver Update Service", "description": "Driver Update" }
+    { "name": "DriverUpdateSvc", "display": "Driver Update Service", "description": "Driver Update" },
+    { "name": "globalUpdate", "display": "globalUpdate", "description": "GlobalUpdate adware service" },
+    { "name": "globalUpdatem", "display": "globalUpdate Medium", "description": "GlobalUpdate adware service (medium)" },
+    { "name": "PirritService", "display": "Pirrit Service", "description": "Pirrit adware" },
+    { "name": "VonteeraService", "display": "Vonteera Service", "description": "Vonteera browser hijack" },
+    { "name": "SafeFinderSvc", "display": "SafeFinder Service", "description": "SafeFinder browser hijack" },
+    { "name": "RocketTabSvc", "display": "RocketTab Service", "description": "RocketTab adware" },
+    { "name": "SearchDonkeyService", "display": "SearchDonkey Service", "description": "SearchDonkey adware" },
+    { "name": "BprotectService", "display": "Bprotect Service", "description": "Bprotect" },
+    { "name": "PCAppStoreService", "display": "PC App Store Service", "description": "PC App Store" },
+    { "name": "ReimageRealTimeProtector", "display": "Reimage Real-Time Protector", "description": "Reimage scareware" },
+    { "name": "DriverEasySvc", "display": "Driver Easy Service", "description": "Driver Easy PUP" },
+    { "name": "ShopperzService", "display": "Shopperz", "description": "Shopperz adware" },
+    { "name": "CrossRiderService", "display": "CrossRider Service", "description": "CrossRider adware framework" },
+    { "name": "OutbyteService", "display": "Outbyte Service", "description": "Outbyte driver updater PUP" },
+    { "name": "MobogenieService", "display": "Mobogenie", "description": "Mobogenie PUP" }
   ]
 }

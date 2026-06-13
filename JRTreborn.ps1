@@ -109,14 +109,14 @@ function Request-Elevation {
     Write-Host "  [!] Relaunching as administrator..." -ForegroundColor Yellow
     Write-Host ""
 
-    $args = "-ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    if ($Scan)            { $args += ' -Scan' }
-    elseif ($Remove)      { $args += ' -Remove' }
-    elseif ($DryRun)      { $args += ' -DryRun' }
-    if ($NoRestorePoint)  { $args += ' -NoRestorePoint' }
-    if ($OutputDir)       { $args += " -OutputDir `"$OutputDir`"" }
+    $elevArgs = "-ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    if ($Scan)            { $elevArgs += ' -Scan' }
+    elseif ($Remove)      { $elevArgs += ' -Remove' }
+    elseif ($DryRun)      { $elevArgs += ' -DryRun' }
+    if ($NoRestorePoint)  { $elevArgs += ' -NoRestorePoint' }
+    if ($OutputDir)       { $elevArgs += " -OutputDir `"$($OutputDir -replace '"', '\"')`"" }
 
-    Start-Process powershell -ArgumentList $args -Verb RunAs
+    Start-Process powershell -ArgumentList $elevArgs -Verb RunAs
     exit
 }
 
@@ -144,6 +144,7 @@ function Import-Database {
         Services  = 'services.json'
         Tasks     = 'tasks.json'
         Browsers  = 'browsers.json'
+        Policies  = 'policies.json'
     }
 
     foreach ($key in $files.Keys) {
@@ -165,6 +166,7 @@ function Import-Database {
                         firefox_extension_ids= $parsed.firefox_extension_ids
                         ie_bho_clsids        = $parsed.ie_bho_clsids
                     }}
+                    'Policies'  { $parsed }
                 }
             } catch {
                 Write-Host "  [!] Failed to load database file '$($files[$key])': $_" -ForegroundColor Red

@@ -6,40 +6,56 @@ Inspired by the original JRT (Junkware Removal Tool) before it was acquired by M
 
 ---
 
+## Download
+
+**[⬇ Download JRTreborn.exe from the latest Release](https://github.com/delanderdev/jrtreborn/releases/latest)**
+
+No installation required. Just download and run.
+
+---
+
 ## Features
 
-- **No installation required** — single portable script, runs from anywhere
+- **Single .exe — no installation** — download, double-click, done
+- **Auto UAC elevation** — prompts for admin rights automatically
 - **Comprehensive detection** covering:
-  - Known adware and PUP programs (200+ signatures)
+  - Known adware and PUP programs (300+ signatures)
   - Registry keys and autostart entries
-  - Malicious scheduled tasks
-  - Rogue Windows services
-  - Browser homepage hijacks (Chrome, Edge, Brave, Firefox)
-  - Browser extensions (Chrome, Edge, Brave, Firefox)
+  - Malicious scheduled tasks and Windows services
+  - Browser homepage, new tab, and search engine hijacks (Chrome, Edge, Brave, Firefox)
+  - Malicious browser extensions (Chrome, Edge, Firefox)
   - Internet Explorer BHOs
+  - **Browser Group Policy hijacks** — force-installed extensions and locked homepages via registry policies
   - Junk files and folders
 - **Safety first** — creates a System Restore Point before any removal
 - **Dry Run mode** — preview what would be removed without making changes
 - **HTML report** — clean visual report saved to your Desktop after every scan
-- **Community-updated database** — JSON signature files anyone can contribute to
+- **Community-updated database** — plain JSON signature files anyone can contribute to via PR
 
 ---
 
 ## Requirements
 
 - Windows 10 or Windows 11
-- PowerShell 5.1 (built into Windows)
-- Administrator privileges (required for removal; scan-only works without)
+- Administrator privileges (the exe will prompt automatically)
 
 ---
 
 ## Quick Start
 
-### Option A: Double-click launcher (easiest)
+### Option A: Download the exe (easiest — recommended for end users)
+
+1. Go to [Releases](https://github.com/delanderdev/jrtreborn/releases/latest)
+2. Download `JRTreborn.exe`
+3. Double-click it
+4. Click **Yes** on the UAC prompt
+5. Choose **Scan and Remove** from the menu
+
+### Option B: Run from source (for developers / contributors)
 
 Right-click `Run-JRTreborn.bat` → **Run as administrator**
 
-### Option B: PowerShell
+### Option C: PowerShell directly
 
 ```powershell
 # Run as Administrator, then:

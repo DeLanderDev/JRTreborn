@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "updated": "2026-06-12",
   "description": "Scheduled tasks created by adware and junkware for persistence",
   "tasks": [
@@ -43,6 +43,27 @@
     { "name": "ValueApps Update", "path": "\\", "description": "ValueApps updater" },
     { "name": "WebCake Update", "path": "\\", "description": "WebCake updater" },
     { "name": "OpenCandy", "path": "\\", "description": "OpenCandy" },
-    { "name": "WildTangent Update", "path": "\\", "description": "WildTangent games updater" }
+    { "name": "WildTangent Update", "path": "\\", "description": "WildTangent games updater" },
+    { "name": "globalUpdate", "path": "\\", "description": "GlobalUpdate adware persistence" },
+    { "name": "globalUpdatem", "path": "\\", "description": "GlobalUpdate medium integrity task" },
+    { "name": "PCAppStore Update", "path": "\\", "description": "PC App Store updater" },
+    { "name": "Reimage Reminder", "path": "\\", "description": "Reimage scareware nag" },
+    { "name": "Driver Easy Scheduled Scan", "path": "\\", "description": "Driver Easy scheduled scan" },
+    { "name": "RocketTab Update", "path": "\\", "description": "RocketTab updater" },
+    { "name": "CrossRider Update", "path": "\\", "description": "CrossRider adware framework updater" },
+    { "name": "Vonteera Update", "path": "\\", "description": "Vonteera updater" },
+    { "name": "SafeFinder Update", "path": "\\", "description": "SafeFinder browser hijack updater" },
+    { "name": "BrowseFox Maintenance", "path": "\\", "description": "BrowseFox maintenance" },
+    { "name": "BackgroundContainer", "path": "\\", "description": "Conduit BackgroundContainer task" },
+    { "name": "DealPlyLive", "path": "\\", "description": "DealPly Live updater" },
+    { "name": "DealPly Update Task User", "path": "\\", "description": "DealPly per-user update task" },
+    { "name": "Pirrit Updater", "path": "\\", "description": "Pirrit adware updater" },
+    { "name": "Shopperz Update", "path": "\\", "description": "Shopperz adware updater" },
+    { "name": "SearchDonkey Update", "path": "\\", "description": "SearchDonkey adware updater" },
+    { "name": "Mobogenie", "path": "\\", "description": "Mobogenie PUP updater" },
+    { "name": "TotalAV Scheduled Scan", "path": "\\", "description": "TotalAV rogue antivirus" },
+    { "name": "PCAcceleratePro", "path": "\\", "description": "PC Accelerate Pro nag/scan task" },
+    { "name": "Outbyte Update", "path": "\\", "description": "Outbyte driver updater task" },
+    { "name": "Driver Easy Update", "path": "\\", "description": "Driver Easy auto-update task" }
   ]
 }

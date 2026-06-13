@@ -153,8 +153,8 @@ function Export-Report {
   <div class="meta">
     Scan completed: $($endTime.ToString('yyyy-MM-dd HH:mm:ss')) &nbsp;&bull;&nbsp;
     Duration: $($duration.ToString('mm\:ss')) &nbsp;&bull;&nbsp;
-    Host: $env:COMPUTERNAME &nbsp;&bull;&nbsp;
-    User: $([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)
+    Host: $([System.Net.WebUtility]::HtmlEncode($env:COMPUTERNAME)) &nbsp;&bull;&nbsp;
+    User: $([System.Net.WebUtility]::HtmlEncode([System.Security.Principal.WindowsIdentity]::GetCurrent().Name))
   </div>
 </header>
 <div class="summary">

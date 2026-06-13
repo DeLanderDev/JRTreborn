@@ -21,6 +21,7 @@ function Invoke-FullScan {
     Invoke-RegistryScan -RegistryList $Database.Registry
     Invoke-FileScan     -FileList $Database.Files
     Invoke-BrowserScan  -BrowserData $Database.Browsers
+    Invoke-PolicyScan   -PolicyData $Database.Policies
 
     Write-Host ""
     Write-LogEntry -Category 'INFO' -Message "Scan complete. $($script:DetectedItems.Count) item(s) found."
@@ -61,7 +62,7 @@ function Invoke-ServiceScan {
 
     foreach ($entry in $ServiceList) {
         $svc = Get-Service -Name $entry.name -ErrorAction SilentlyContinue
-        if ($null -eq $svc) {
+        if ($null -eq $svc -and $entry.display) {
             # Try matching by display name
             $svc = Get-Service | Where-Object { $_.DisplayName -ieq $entry.display } | Select-Object -First 1
         }
@@ -440,6 +441,72 @@ function Invoke-BrowserScan {
             }
         }
     }
+
+# ─── Browser Group Policy Scanner ───────────────────────────────────────────
+
+function Invoke-PolicyScan {
+    param([PSCustomObject]$PolicyData)
+
+    if ($null -eq $PolicyData) { return }
+
+    Write-LogEntry -Category 'INFO' -Message "Scanning browser group policies for hijacks..."
+
+    $knownBadIds = $PolicyData.known_malicious_force_install_ids
+
+    # Check force-install extension keys for known-bad extension IDs
+    foreach ($keyEntry in $PolicyData.force_install_extension_keys) {
+        if (-not (Test-Path $keyEntry.path)) { continue }
+
+        try {
+            $values = Get-ItemProperty -Path $keyEntry.path -ErrorAction Stop
+            foreach ($prop in $values.PSObject.Properties | Where-Object { $_.Name -notmatch '^PS' }) {
+                $extValue = $prop.Value
+                # Force-install values are like "extid;update_url"
+                $extId = ($extValue -split ';')[0].Trim()
+                if ($knownBadIds -contains $extId) {
+                    Write-LogEntry -Category 'FOUND' -Message "Policy force-install of known-bad extension: $extId" -Detail "$($keyEntry.path)\$($prop.Name)"
+                    $script:DetectedItems.Add(@{
+                        Type        = 'PolicyExtension'
+                        Name        = "Force-installed extension: $extId"
+                        Description = $keyEntry.description
+                        Data        = @{
+                            RegPath    = $keyEntry.path
+                            ValueName  = $prop.Name
+                            ExtId      = $extId
+                        }
+                    })
+                }
+            }
+        } catch {
+            Write-LogEntry -Category 'WARNING' -Message "Could not read policy key $($keyEntry.path): $($_.Exception.Message)"
+        }
+    }
+
+    # Check homepage/search override policy values
+    foreach ($policyEntry in $PolicyData.suspicious_policy_values) {
+        if (-not (Test-Path $policyEntry.path)) { continue }
+
+        try {
+            $val = Get-ItemProperty -Path $policyEntry.path -Name $policyEntry.value -ErrorAction SilentlyContinue
+            if ($null -ne $val) {
+                $valData = $val.($policyEntry.value)
+                Write-LogEntry -Category 'FOUND' -Message "Browser policy override: $($policyEntry.name) = $valData" -Detail $policyEntry.description
+                $script:DetectedItems.Add(@{
+                    Type        = 'PolicyOverride'
+                    Name        = $policyEntry.name
+                    Description = $policyEntry.description
+                    Data        = @{
+                        RegPath   = $policyEntry.path
+                        ValueName = $policyEntry.value
+                        Value     = $valData
+                    }
+                })
+            }
+        } catch {
+            Write-LogEntry -Category 'WARNING' -Message "Could not check policy value $($policyEntry.path)\$($policyEntry.value): $($_.Exception.Message)"
+        }
+    }
+}
 
     # Internet Explorer / Legacy Edge BHOs (registry-based)
     $bhoPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects'

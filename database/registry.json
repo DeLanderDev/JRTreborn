@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "updated": "2026-06-12",
   "description": "Registry keys and values associated with known adware, junkware, and browser hijackers",
   "keys": [
@@ -461,6 +461,102 @@
       "name": "Search Protect - HKLM Wow6432",
       "path": "HKLM:\\SOFTWARE\\Wow6432Node\\SearchProtect",
       "action": "remove_key"
-    }
+    },
+
+    { "name": "CrossRider - HKLM", "path": "HKLM:\\SOFTWARE\\CrossRider", "action": "remove_key" },
+    { "name": "CrossRider - HKCU", "path": "HKCU:\\SOFTWARE\\CrossRider", "action": "remove_key" },
+    { "name": "GlobalUpdate - HKLM", "path": "HKLM:\\SOFTWARE\\GlobalUpdate", "action": "remove_key" },
+    { "name": "GlobalUpdate - HKCU", "path": "HKCU:\\SOFTWARE\\GlobalUpdate", "action": "remove_key" },
+    { "name": "Elex Browser Hijack - HKCU", "path": "HKCU:\\SOFTWARE\\Elex-tech", "action": "remove_key" },
+    { "name": "Elex Browser Hijack - HKLM", "path": "HKLM:\\SOFTWARE\\Elex-tech", "action": "remove_key" },
+    { "name": "Vonteera - HKLM", "path": "HKLM:\\SOFTWARE\\Vonteera", "action": "remove_key" },
+    { "name": "Vonteera - HKCU", "path": "HKCU:\\SOFTWARE\\Vonteera", "action": "remove_key" },
+    { "name": "SafeFinder - HKCU", "path": "HKCU:\\SOFTWARE\\SafeFinder", "action": "remove_key" },
+    { "name": "SafeFinder - HKLM", "path": "HKLM:\\SOFTWARE\\SafeFinder", "action": "remove_key" },
+    { "name": "Pirrit - HKLM", "path": "HKLM:\\SOFTWARE\\Pirrit", "action": "remove_key" },
+    { "name": "Suptab - HKCU", "path": "HKCU:\\SOFTWARE\\Suptab", "action": "remove_key" },
+    { "name": "Suptab - HKLM", "path": "HKLM:\\SOFTWARE\\Suptab", "action": "remove_key" },
+    { "name": "MySearchDial - HKCU", "path": "HKCU:\\SOFTWARE\\mysearchdial.com", "action": "remove_key" },
+    { "name": "MySearchDial - HKLM", "path": "HKLM:\\SOFTWARE\\mysearchdial.com", "action": "remove_key" },
+    { "name": "Sweet Page - HKCU", "path": "HKCU:\\SOFTWARE\\sweet-page", "action": "remove_key" },
+    { "name": "Sweet Page - HKLM", "path": "HKLM:\\SOFTWARE\\sweet-page", "action": "remove_key" },
+    { "name": "Webssearches - HKCU", "path": "HKCU:\\SOFTWARE\\webssearches", "action": "remove_key" },
+    { "name": "PC App Store - HKLM", "path": "HKLM:\\SOFTWARE\\PC App Store", "action": "remove_key" },
+    { "name": "PC App Store - HKCU", "path": "HKCU:\\SOFTWARE\\PC App Store", "action": "remove_key" },
+    { "name": "Reimage - HKLM", "path": "HKLM:\\SOFTWARE\\Reimage", "action": "remove_key" },
+    { "name": "Reimage - HKCU", "path": "HKCU:\\SOFTWARE\\Reimage", "action": "remove_key" },
+    { "name": "PC Speed Maximizer Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "PC Speed Maximizer", "action": "remove_value" },
+    { "name": "PC App Store Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "PC App Store", "action": "remove_value" },
+    { "name": "Reimage Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "Reimage Reminder", "action": "remove_value" },
+    { "name": "GlobalUpdate Run - HKLM", "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "globalUpdate", "action": "remove_value" },
+    { "name": "GlobalUpdate Run - HKCU", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "globalUpdate", "action": "remove_value" },
+    { "name": "RocketTab Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "RocketTab", "action": "remove_value" },
+
+    {
+      "name": "Chrome Force-Install Extension Policy (adware)",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome\\ExtensionInstallForcelist",
+      "action": "remove_key",
+      "note": "Adware sets Chrome enterprise policies to force-install extensions. Review entries before removing — legitimate IT deployments may use this key."
+    },
+    {
+      "name": "Chrome Force-Install Extension Policy (adware) - Wow6432",
+      "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Policies\\Google\\Chrome\\ExtensionInstallForcelist",
+      "action": "remove_key",
+      "note": "32-bit policy key on 64-bit systems"
+    },
+    {
+      "name": "Edge Force-Install Extension Policy (adware)",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge\\ExtensionInstallForcelist",
+      "action": "remove_key",
+      "note": "Adware sets Edge enterprise policies to force-install extensions"
+    },
+    {
+      "name": "Chrome Homepage Override Policy",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "HomepageLocation",
+      "action": "remove_value",
+      "note": "Set by browser hijackers to lock the Chrome homepage"
+    },
+    {
+      "name": "Chrome RestoreOnStartup hijack",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "RestoreOnStartup",
+      "action": "remove_value",
+      "note": "Set by browser hijackers to control startup behaviour"
+    },
+    {
+      "name": "Edge Homepage Override Policy",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      "value": "HomepageLocation",
+      "action": "remove_value",
+      "note": "Set by browser hijackers to lock the Edge homepage"
+    },
+    {
+      "name": "Chrome New Tab Override Policy",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "NewTabPageLocation",
+      "action": "remove_value"
+    },
+    {
+      "name": "Chrome Search Provider Override Policy",
+      "path": "HKLM:\\SOFTWARE\\Policies\\Google\\Chrome",
+      "value": "DefaultSearchProviderSearchURL",
+      "action": "remove_value"
+    },
+
+    { "name": "Mixi.DJ - HKCU", "path": "HKCU:\\SOFTWARE\\Mixi.DJ", "action": "remove_key" },
+    { "name": "Bprotect - HKCU", "path": "HKCU:\\SOFTWARE\\Bprotect", "action": "remove_key" },
+    { "name": "Gboxapp - HKCU", "path": "HKCU:\\SOFTWARE\\gboxapp", "action": "remove_key" },
+    { "name": "Searchult - HKCU", "path": "HKCU:\\SOFTWARE\\Searchult", "action": "remove_key" },
+    { "name": "Plasmoo - HKCU", "path": "HKCU:\\SOFTWARE\\Plasmoo", "action": "remove_key" },
+    { "name": "RocketTab - HKCU", "path": "HKCU:\\SOFTWARE\\RocketTab", "action": "remove_key" },
+    { "name": "SearchEncrypt - HKCU", "path": "HKCU:\\SOFTWARE\\Search Encrypt", "action": "remove_key" },
+    { "name": "SearchDonkey - HKLM", "path": "HKLM:\\SOFTWARE\\SearchDonkey", "action": "remove_key" },
+    { "name": "Shopperz - HKLM", "path": "HKLM:\\SOFTWARE\\Shopperz", "action": "remove_key" },
+    { "name": "WildTangent Games - HKLM", "path": "HKLM:\\SOFTWARE\\WildTangent\\Games", "action": "remove_key" },
+    { "name": "PC App Store - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\PC App Store", "action": "remove_key" },
+    { "name": "Reimage - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Reimage", "action": "remove_key" },
+    { "name": "CrossRider - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\CrossRider", "action": "remove_key" },
+    { "name": "GlobalUpdate - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\GlobalUpdate", "action": "remove_key" }
   ]
 }
