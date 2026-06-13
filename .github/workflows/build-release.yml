@@ -31,35 +31,10 @@ jobs:
           echo "version=$ver" >> $env:GITHUB_OUTPUT
           echo "Building version: $ver"
 
-      - name: Install ps2exe
+      - name: Build exe (merge + compile C# launcher)
         shell: pwsh
         run: |
-          Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module -Name ps2exe -Scope CurrentUser -Force -AllowClobber
-          Import-Module ps2exe
-
-      - name: Merge source files into standalone script
-        shell: pwsh
-        run: |
-          .\build\Merge-Script.ps1 -OutputPath dist\JRTreborn-standalone.ps1
-
-      - name: Compile standalone script to exe
-        shell: pwsh
-        run: |
-          $ver = (Get-Content version.txt -Raw).Trim()
-          $vFull = ($ver -split '\.') + @('0','0','0','0') | Select-Object -First 4
-          $vFull = $vFull -join '.'
-
-          Invoke-PS2EXE `
-            -InputFile  dist\JRTreborn-standalone.ps1 `
-            -OutputFile dist\JRTreborn.exe `
-            -requireAdmin `
-            -title       'JRTreborn' `
-            -description 'Junkware Removal Tool Reborn - Open Source Adware & PUP Remover' `
-            -company     'JRTreborn Open Source Project' `
-            -product     'JRTreborn' `
-            -copyright   "Open Source (MIT) $(Get-Date -Format yyyy)" `
-            -version     $vFull
+          .\build\Build-Exe.ps1 -Version (Get-Content version.txt -Raw).Trim()
 
       - name: Verify build output
         shell: pwsh
