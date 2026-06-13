@@ -4,6 +4,9 @@
 JRTreborn_*.log
 JRTreborn_*.html
 
+# Build output — exe is published via GitHub Releases, not committed
+dist/
+
 # Windows
 Thumbs.db
 Desktop.ini

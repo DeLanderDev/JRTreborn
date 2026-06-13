@@ -1,0 +1,126 @@
+name: Build and Release JRTreborn.exe
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build JRTreborn.exe
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $ver = (Get-Content version.txt -Raw).Trim()
+          echo "version=$ver" >> $env:GITHUB_OUTPUT
+          echo "Building version: $ver"
+
+      - name: Install ps2exe
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module -Name ps2exe -Scope CurrentUser -Force -AllowClobber
+          Import-Module ps2exe
+
+      - name: Merge source files into standalone script
+        shell: pwsh
+        run: |
+          .\build\Merge-Script.ps1 -OutputPath dist\JRTreborn-standalone.ps1
+
+      - name: Compile standalone script to exe
+        shell: pwsh
+        run: |
+          $ver = (Get-Content version.txt -Raw).Trim()
+          $vFull = ($ver -split '\.') + @('0','0','0','0') | Select-Object -First 4
+          $vFull = $vFull -join '.'
+
+          Invoke-PS2EXE `
+            -InputFile  dist\JRTreborn-standalone.ps1 `
+            -OutputFile dist\JRTreborn.exe `
+            -requireAdmin `
+            -title       'JRTreborn' `
+            -description 'Junkware Removal Tool Reborn - Open Source Adware & PUP Remover' `
+            -company     'JRTreborn Open Source Project' `
+            -product     'JRTreborn' `
+            -copyright   "Open Source (MIT) $(Get-Date -Format yyyy)" `
+            -version     $vFull
+
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          $exe = 'dist\JRTreborn.exe'
+          if (-not (Test-Path $exe)) {
+            Write-Error "Build failed — JRTreborn.exe not found"
+            exit 1
+          }
+          $size = [math]::Round((Get-Item $exe).Length / 1MB, 2)
+          Write-Host "Build OK: $exe ($size MB)"
+
+      - name: Upload exe as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: JRTreborn-${{ steps.version.outputs.version }}-exe
+          path: dist/JRTreborn.exe
+          retention-days: 90
+
+      # ── Create a GitHub Release when a version tag is pushed ─────────────────
+      - name: Generate release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: release_notes
+        shell: pwsh
+        run: |
+          $ver = (Get-Content version.txt -Raw).Trim()
+          $notes = @"
+          ## JRTreborn v$ver
+
+          ### Download
+          Download **JRTreborn.exe** from the assets below.
+          No installation required — just double-click and follow the prompts.
+
+          ### Requirements
+          - Windows 10 or Windows 11
+          - Administrator privileges (the tool will prompt for elevation automatically)
+
+          ### Usage
+          1. Download ``JRTreborn.exe``
+          2. Double-click it
+          3. Allow the UAC elevation prompt
+          4. Choose **Scan and Remove** from the menu
+
+          ### What it detects
+          - Adware and browser hijackers (homepage, new tab, search engine takeovers)
+          - Potentially Unwanted Programs (PUPs) — fake cleaners, driver updaters, toolbars
+          - Malicious browser extensions (Chrome, Edge, Firefox)
+          - Browser Group Policy hijacks (force-installed extensions, locked homepages)
+          - Adware services, scheduled tasks, and registry entries
+
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full details.
+          "@
+          $notes | Out-File release_notes.md -Encoding UTF8
+          echo "notes_file=release_notes.md" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: JRTreborn v${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: dist/JRTreborn.exe
