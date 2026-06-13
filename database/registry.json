@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "updated": "2026-06-12",
+  "version": "1.2.0",
+  "updated": "2026-06-13",
   "description": "Registry keys and values associated with known adware, junkware, and browser hijackers",
   "keys": [
     {
@@ -557,6 +557,27 @@
     { "name": "PC App Store - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\PC App Store", "action": "remove_key" },
     { "name": "Reimage - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Reimage", "action": "remove_key" },
     { "name": "CrossRider - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\CrossRider", "action": "remove_key" },
-    { "name": "GlobalUpdate - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\GlobalUpdate", "action": "remove_key" }
+    { "name": "GlobalUpdate - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\GlobalUpdate", "action": "remove_key" },
+    { "name": "Superfish - HKLM", "path": "HKLM:\\SOFTWARE\\Superfish Inc", "action": "remove_key" },
+    { "name": "Linkury - HKCU", "path": "HKCU:\\SOFTWARE\\Linkury", "action": "remove_key" },
+    { "name": "Linkury - HKLM", "path": "HKLM:\\SOFTWARE\\Linkury", "action": "remove_key" },
+    { "name": "SmartBar - HKCU", "path": "HKCU:\\SOFTWARE\\SmartBar", "action": "remove_key" },
+    { "name": "InstallCore - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\InstallCore", "action": "remove_key" },
+    { "name": "Amonetize - HKCU", "path": "HKCU:\\SOFTWARE\\Amonetize", "action": "remove_key" },
+    { "name": "PriceMeter - HKCU", "path": "HKCU:\\SOFTWARE\\PriceMeter", "action": "remove_key" },
+    { "name": "SavingsBull - HKCU", "path": "HKCU:\\SOFTWARE\\SavingsBull", "action": "remove_key" },
+    { "name": "Mobogenie - HKCU", "path": "HKCU:\\SOFTWARE\\Mobogenie", "action": "remove_key" },
+    { "name": "Baidu - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Baidu", "action": "remove_key" },
+    { "name": "eFast - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\eFast", "action": "remove_key" },
+    { "name": "BoBrowser - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\BoBrowser", "action": "remove_key" },
+    { "name": "Systweak - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\Systweak", "action": "remove_key" },
+    { "name": "OptimizerPro - HKLM Wow6432", "path": "HKLM:\\SOFTWARE\\Wow6432Node\\OptimizerPro", "action": "remove_key" },
+    { "name": "WebDiscover - HKCU", "path": "HKCU:\\SOFTWARE\\WebDiscover", "action": "remove_key" },
+    { "name": "Wajam Updater - HKLM Run", "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "WajamUpdater", "action": "remove_value" },
+    { "name": "Linkury - HKCU Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "Linkury", "action": "remove_value" },
+    { "name": "SmartBar - HKCU Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "SmartbarApp", "action": "remove_value" },
+    { "name": "OptimizerPro - HKCU Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "OptimizerPro", "action": "remove_value" },
+    { "name": "PC Accelerate Pro - HKCU Run", "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "PC Accelerate Pro", "action": "remove_value" },
+    { "name": "DNS Unlocker - HKLM Run", "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "value": "DNSUnlocker", "action": "remove_value" }
   ]
 }

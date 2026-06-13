@@ -4,6 +4,19 @@ All notable changes to JRTreborn will be documented here.
 
 ---
 
+## [1.2.0] - 2026-06-13
+
+### Build System
+- Replaced `ps2exe` with a native C# launcher (`build/Launcher.cs` + `build/Launcher.manifest`) compiled via `csc.exe` — no PowerShell Gallery dependency in CI and no ps2exe heuristic AV fingerprint. The exe embeds the standalone script as compressed base64, extracts it to a temp file at runtime, runs it elevated (UAC via manifest), and cleans up on exit
+
+### Detection Database v1.2.0 (curated expansion)
+- **browsers.json** (+61 homepage hijackers): searchmine, searchbaron, searchmarquis, coolwebsearch, omiga-plus, holasearch, searchgol, mixidj, anysearchmanager, dosearches, Mindspark hijack domains (mapsgalaxy, televisionfanatic, pdfconverterhq, weatherblink, packtrackplus, etc.) and more
+- **programs.json** (+39): Yontoo, Superfish, PremierOpinion, OpenCandy, InstallCore, DealPly, Linkury/SmartBar, Wajam, Mobogenie, Baidu PC Faster, PriceMeter, SavingsBull, eFast, BoBrowser, OptimizerPro, RegClean Pro, SlimCleaner, and Mindspark toolbar variants
+- **registry.json** (+21): vendor keys and Run values for Yontoo, Superfish, Linkury, SmartBar, DealPly, InstallCore, Amonetize, PriceMeter, SavingsBull, Mobogenie, Baidu, eFast, BoBrowser, Systweak, OptimizerPro, WebDiscover, Wajam, DNS Unlocker
+- Note: extension IDs and BHO CLSIDs were intentionally **not** bulk-expanded — unverified identifiers in a removal tool risk deleting legitimate browser extensions
+
+---
+
 ## [1.1.0] - 2026-06-13
 
 ### Build System
