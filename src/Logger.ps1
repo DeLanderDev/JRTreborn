@@ -19,7 +19,7 @@ function Initialize-Logger {
 
 function Write-LogEntry {
     param(
-        [ValidateSet('INFO','FOUND','REMOVED','SKIPPED','WARNING','ERROR')]
+        [ValidateSet('INFO','FOUND','SUSPECT','REMOVED','SKIPPED','WARNING','ERROR')]
         [string]$Category,
         [string]$Message,
         [string]$Detail = ''
@@ -35,6 +35,7 @@ function Write-LogEntry {
 
     $color = switch ($Category) {
         'FOUND'   { 'Yellow' }
+        'SUSPECT' { 'Magenta' }
         'REMOVED' { 'Green' }
         'WARNING' { 'DarkYellow' }
         'ERROR'   { 'Red' }
@@ -77,9 +78,12 @@ function Export-Report {
     $lines += "-" * 70
     $lines += "SUMMARY"
     $lines += "-" * 70
-    $lines += "Items found:   $($ScanSummary.Found)"
-    $lines += "Items removed: $($ScanSummary.Removed)"
-    $lines += "Errors:        $($ScanSummary.Errors)"
+    $lines += "Items found:     $($ScanSummary.Found)"
+    if ($ScanSummary.ContainsKey('Suspected')) {
+        $lines += "Items suspected: $($ScanSummary.Suspected)"
+    }
+    $lines += "Items removed:   $($ScanSummary.Removed)"
+    $lines += "Errors:          $($ScanSummary.Errors)"
     $lines += "-" * 70
 
     $lines | Out-File -FilePath $script:LogFilePath -Encoding UTF8
@@ -89,6 +93,7 @@ function Export-Report {
     $htmlRows = foreach ($entry in $script:LogEntries) {
         $cssClass = switch ($entry.Category) {
             'FOUND'   { 'found' }
+            'SUSPECT' { 'suspect' }
             'REMOVED' { 'removed' }
             'WARNING' { 'warning' }
             'ERROR'   { 'error' }
@@ -100,6 +105,9 @@ function Export-Report {
     }
 
     $foundBadge   = "<span class='badge badge-found'>$($ScanSummary.Found) Found</span>"
+    $suspectBadge = if ($ScanSummary.ContainsKey('Suspected') -and $ScanSummary.Suspected -gt 0) {
+        "<span class='badge badge-suspect'>$($ScanSummary.Suspected) Suspected</span>"
+    } else { '' }
     $removedBadge = "<span class='badge badge-removed'>$($ScanSummary.Removed) Removed</span>"
     $errorBadge   = "<span class='badge badge-error'>$($ScanSummary.Errors) Errors</span>"
 
@@ -135,6 +143,9 @@ function Export-Report {
   .detail { color: var(--text-dim); font-size: 12px; }
   .found td { color: var(--yellow); }
   .found td.cat { color: var(--yellow); }
+  .suspect td { color: #c586e0; }
+  .suspect td.cat { color: #c586e0; }
+  .badge-suspect { background: rgba(197,134,224,0.15); color: #c586e0; border: 1px solid #c586e0; }
   .removed td { color: var(--green); }
   .removed td.cat { color: var(--green); }
   .warning td { color: #f0a500; }
@@ -158,7 +169,7 @@ function Export-Report {
   </div>
 </header>
 <div class="summary">
-  $foundBadge $removedBadge $errorBadge
+  $foundBadge $suspectBadge $removedBadge $errorBadge
   <span class="duration">Duration: $($duration.ToString('mm\:ss'))</span>
 </div>
 <div class="log-container">

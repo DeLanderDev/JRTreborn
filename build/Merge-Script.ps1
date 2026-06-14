@@ -132,6 +132,13 @@ function Import-Database {
                 }}
                 'Policies'  { $parsed }
             }
+
+            if ($dbKey -eq 'Programs') {
+                $db['ProgramPublishers'] = $parsed.publishers
+                $db['ProgramHeuristics'] = $parsed.heuristics
+                $db['ProgramAllowlist']  = $parsed.heuristic_allowlist
+                $db['ProgramAppx']       = $parsed.appx_bloatware
+            }
         } catch {
             Write-Host "  [!] Failed to load embedded DB '$rawKey': $_" -ForegroundColor Red
         }
@@ -156,6 +163,27 @@ $mainScript = $mainScript -replace '(?s)# ─── Database loader.*?^}(\r?\n)'
 $mainScript = $mainScript -replace '(?m)^\$dbVersionFile.*?\r?\n', ''
 $mainScript = $mainScript -replace '(?m)^\$dbVersion.*?\r?\n', "Write-Host `"  Database: embedded (standalone build)`" -ForegroundColor DarkGray`n"
 
+# ─── Hoist the [CmdletBinding()]/param() block to the top of the standalone ──
+# A param() block must be the first statement in a script. When the main script
+# is inlined after the embedded database and source modules, its param block
+# would be mid-file (a parse error), so extract it and emit it at the very top.
+$hoistTokens = $null; $hoistErrors = $null
+$mainAst = [System.Management.Automation.Language.Parser]::ParseInput($mainScript, [ref]$hoistTokens, [ref]$hoistErrors)
+$paramHeader = ''
+if ($mainAst.ParamBlock) {
+    $pb = $mainAst.ParamBlock
+    $startOffset = $pb.Extent.StartOffset
+    if ($pb.Attributes -and $pb.Attributes.Count -gt 0) {
+        # Include preceding attributes such as [CmdletBinding()] / [OutputType()]
+        $startOffset = ($pb.Attributes | ForEach-Object { $_.Extent.StartOffset } | Measure-Object -Minimum).Minimum
+    }
+    $len = $pb.Extent.EndOffset - $startOffset
+    $paramHeader = $mainScript.Substring($startOffset, $len)
+    $mainScript  = $mainScript.Remove($startOffset, $len)
+} else {
+    Write-Host "  WARNING: No param() block found in main script to hoist." -ForegroundColor Yellow
+}
+
 # ─── Assemble the final merged script ────────────────────────────────────────
 
 $banner = @"
@@ -170,6 +198,10 @@ $banner = @"
 $parts = @()
 $parts += $banner
 $parts += ''
+if ($paramHeader) {
+    $parts += $paramHeader
+    $parts += ''
+}
 $parts += $dbEmbedLines -join "`n"
 $parts += ''
 $parts += '# ─── Source modules (inlined) ─────────────────────────────────────────────────'

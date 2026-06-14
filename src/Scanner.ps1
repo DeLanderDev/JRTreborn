@@ -17,7 +17,11 @@ function Invoke-FullScan {
     Invoke-ProcessScan  -ProcessList $Database.Processes
     Invoke-ServiceScan  -ServiceList $Database.Services
     Invoke-TaskScan     -TaskList $Database.Tasks
-    Invoke-ProgramScan  -ProgramList $Database.Programs
+    Invoke-ProgramScan  -ProgramList         $Database.Programs `
+                        -PublisherList       $Database.ProgramPublishers `
+                        -HeuristicList       $Database.ProgramHeuristics `
+                        -HeuristicAllowlist  $Database.ProgramAllowlist `
+                        -AppxList            $Database.ProgramAppx
     Invoke-RegistryScan -RegistryList $Database.Registry
     Invoke-FileScan     -FileList $Database.Files
     Invoke-BrowserScan  -BrowserData $Database.Browsers
@@ -113,10 +117,48 @@ function Invoke-TaskScan {
 
 # ─── Installed Programs Scanner ──────────────────────────────────────────────
 
+# Registry keys flagged during the current program scan (dedup across routes)
+$script:FlaggedProgramKeys = $null
+# Registry keys for trusted-vendor apps that must never be flagged (allowlist)
+$script:ProgramAllowKeys = $null
+
+function Add-ProgramDetection {
+    param(
+        [pscustomobject]$Hit,
+        [string]$RuleName,
+        [string]$Severity = 'Known',
+        [string]$Detail
+    )
+
+    if ($script:FlaggedProgramKeys.Contains($Hit.Key)) { return }
+    # Global safeguard: never flag apps published by a trusted/allowlisted vendor,
+    # even via a 'Known' signature — prevents auto-removing legitimate software.
+    if ($script:ProgramAllowKeys -and $script:ProgramAllowKeys.Contains($Hit.Key)) { return }
+    [void]$script:FlaggedProgramKeys.Add($Hit.Key)
+
+    $cat = if ($Severity -eq 'Suspected') { 'SUSPECT' } else { 'FOUND' }
+    Write-LogEntry -Category $cat -Message "Program: $($Hit.DisplayName)" -Detail "$RuleName | Publisher: $($Hit.Publisher)"
+    $script:DetectedItems.Add(@{
+        Type        = 'Program'
+        Name        = $Hit.DisplayName
+        Description = $Detail
+        Severity    = $Severity
+        Data        = $Hit
+    })
+}
+
 function Invoke-ProgramScan {
-    param([array]$ProgramList)
+    param(
+        [array]$ProgramList,
+        [array]$PublisherList,
+        [array]$HeuristicList,
+        [array]$HeuristicAllowlist,
+        [array]$AppxList
+    )
 
     Write-LogEntry -Category 'INFO' -Message "Scanning installed programs..."
+
+    $script:FlaggedProgramKeys = [System.Collections.Generic.HashSet[string]]::new()
 
     $uninstallPaths = @(
         'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
@@ -124,7 +166,7 @@ function Invoke-ProgramScan {
         'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
     )
 
-    $installedApps = foreach ($path in $uninstallPaths) {
+    $installedApps = @(foreach ($path in $uninstallPaths) {
         if (Test-Path $path) {
             Get-ChildItem -Path $path -ErrorAction SilentlyContinue | ForEach-Object {
                 $props = Get-ItemProperty -Path $_.PSPath -ErrorAction SilentlyContinue
@@ -141,28 +183,108 @@ function Invoke-ProgramScan {
                 }
             }
         }
+    })
+
+    # Pre-compute the trusted-vendor allowlist (by publisher) so every route honors it
+    $script:ProgramAllowKeys = [System.Collections.Generic.HashSet[string]]::new()
+    if ($HeuristicAllowlist) {
+        foreach ($app in $installedApps) {
+            if (-not $app.Publisher) { continue }
+            foreach ($alw in $HeuristicAllowlist) {
+                if ($app.Publisher -like "*$alw*") { [void]$script:ProgramAllowKeys.Add($app.Key); break }
+            }
+        }
     }
 
+    # ── Route 1: known programs by DisplayName (and install path for distinctive names) ──
     foreach ($entry in $ProgramList) {
         foreach ($matchPattern in $entry.match) {
             $hits = $installedApps | Where-Object {
-                $_.DisplayName -like "*$matchPattern*"
+                $_.DisplayName -like "*$matchPattern*" -or
+                ($matchPattern.Length -ge 5 -and $_.InstallPath -and $_.InstallPath -like "*$matchPattern*")
             }
             foreach ($hit in $hits) {
-                # Avoid duplicate entries for the same registry key
-                $alreadyFound = $script:DetectedItems | Where-Object {
-                    $_.Type -eq 'Program' -and $_.Data.Key -eq $hit.Key
-                }
-                if (-not $alreadyFound) {
-                    Write-LogEntry -Category 'FOUND' -Message "Program: $($hit.DisplayName)" -Detail "Publisher: $($hit.Publisher) | Key: $($hit.Key)"
-                    $script:DetectedItems.Add(@{
-                        Type        = 'Program'
-                        Name        = $hit.DisplayName
-                        Description = $entry.name
-                        Data        = $hit
-                    })
+                Add-ProgramDetection -Hit $hit -RuleName $entry.name -Severity 'Known' -Detail $entry.name
+            }
+        }
+    }
+
+    # ── Route A: known-bad publisher (one rule covers an entire vendor) ──
+    if ($PublisherList) {
+        foreach ($pub in $PublisherList) {
+            if (-not $pub.publisher) { continue }
+            $hits = $installedApps | Where-Object { $_.Publisher -and $_.Publisher -like "*$($pub.publisher)*" }
+            foreach ($hit in $hits) {
+                Add-ProgramDetection -Hit $hit -RuleName $pub.name -Severity 'Known' -Detail "$($pub.name) [publisher: $($hit.Publisher)]"
+            }
+        }
+    }
+
+    # ── Route D/E: heuristic 'Suspected' tier — catches novel PUPs by pattern ──
+    if ($HeuristicList) {
+        foreach ($app in $installedApps) {
+            if ($script:FlaggedProgramKeys.Contains($app.Key)) { continue }
+
+            # Allowlist trusted vendors so legitimate software is never flagged
+            $allowed = $false
+            if ($HeuristicAllowlist) {
+                foreach ($alw in $HeuristicAllowlist) {
+                    if (($app.Publisher   -and $app.Publisher   -like "*$alw*") -or
+                        ($app.DisplayName -and $app.DisplayName -like "*$alw*")) {
+                        $allowed = $true; break
+                    }
                 }
             }
+            if ($allowed) { continue }
+
+            foreach ($h in $HeuristicList) {
+                if (-not $h.pattern) { continue }
+                $field  = if ($h.field) { $h.field } else { 'displayname' }
+                $target = if ($field -eq 'publisher') { $app.Publisher } else { $app.DisplayName }
+                if ($target -and $target -like "*$($h.pattern)*") {
+                    $reason = "Suspected PUP — $($h.reason)"
+                    # Route E: best-effort Authenticode signature enrichment
+                    try {
+                        if ($app.InstallPath -and (Test-Path $app.InstallPath)) {
+                            $exe = Get-ChildItem -Path $app.InstallPath -Filter '*.exe' -ErrorAction SilentlyContinue |
+                                   Select-Object -First 1
+                            if ($exe) {
+                                $sig = Get-AuthenticodeSignature -FilePath $exe.FullName -ErrorAction SilentlyContinue
+                                if ($sig -and $sig.Status -ne 'Valid') {
+                                    $reason += ' [unsigned/untrusted binary]'
+                                }
+                            }
+                        }
+                    } catch { }
+                    Add-ProgramDetection -Hit $app -RuleName "Heuristic: $($h.pattern)" -Severity 'Suspected' -Detail $reason
+                    break
+                }
+            }
+        }
+    }
+
+    # ── Route C: Appx/MSIX Store bloatware (Suspected — never auto-removed) ──
+    if ($AppxList -and (Get-Command Get-AppxPackage -ErrorAction SilentlyContinue)) {
+        try {
+            $pkgs = Get-AppxPackage -ErrorAction SilentlyContinue
+            foreach ($pkg in $pkgs) {
+                foreach ($pat in $AppxList) {
+                    if (-not $pat.match) { continue }
+                    if ($pkg.Name -like $pat.match) {
+                        Write-LogEntry -Category 'SUSPECT' -Message "Appx package: $($pkg.Name)" -Detail $pat.name
+                        $script:DetectedItems.Add(@{
+                            Type        = 'AppxPackage'
+                            Name        = $pkg.Name
+                            Description = "Suspected Store bloatware — $($pat.name)"
+                            Severity    = 'Suspected'
+                            Data        = @{ PackageFullName = $pkg.PackageFullName; Name = $pkg.Name }
+                        })
+                        break
+                    }
+                }
+            }
+        } catch {
+            Write-LogEntry -Category 'WARNING' -Message "Appx enumeration failed: $($_.Exception.Message)"
         }
     }
 }
@@ -442,6 +564,26 @@ function Invoke-BrowserScan {
         }
     }
 
+    # Internet Explorer / Legacy Edge BHOs (registry-based)
+    $bhoPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects'
+    if (Test-Path $bhoPath) {
+        $installedBhos = Get-ChildItem -Path $bhoPath -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty PSChildName
+
+        foreach ($bhoEntry in $BrowserData.ie_bho_clsids) {
+            if ($installedBhos -contains $bhoEntry.clsid) {
+                Write-LogEntry -Category 'FOUND' -Message "IE/Edge BHO: $($bhoEntry.name) [$($bhoEntry.clsid)]"
+                $script:DetectedItems.Add(@{
+                    Type        = 'IEBho'
+                    Name        = $bhoEntry.name
+                    Description = "Internet Explorer BHO"
+                    Data        = "$bhoPath\$($bhoEntry.clsid)"
+                })
+            }
+        }
+    }
+}
+
 # ─── Browser Group Policy Scanner ───────────────────────────────────────────
 
 function Invoke-PolicyScan {
@@ -504,26 +646,6 @@ function Invoke-PolicyScan {
             }
         } catch {
             Write-LogEntry -Category 'WARNING' -Message "Could not check policy value $($policyEntry.path)\$($policyEntry.value): $($_.Exception.Message)"
-        }
-    }
-}
-
-    # Internet Explorer / Legacy Edge BHOs (registry-based)
-    $bhoPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects'
-    if (Test-Path $bhoPath) {
-        $installedBhos = Get-ChildItem -Path $bhoPath -ErrorAction SilentlyContinue |
-            Select-Object -ExpandProperty PSChildName
-
-        foreach ($bhoEntry in $BrowserData.ie_bho_clsids) {
-            if ($installedBhos -contains $bhoEntry.clsid) {
-                Write-LogEntry -Category 'FOUND' -Message "IE/Edge BHO: $($bhoEntry.name) [$($bhoEntry.clsid)]"
-                $script:DetectedItems.Add(@{
-                    Type        = 'IEBho'
-                    Name        = $bhoEntry.name
-                    Description = "Internet Explorer BHO"
-                    Data        = "$bhoPath\$($bhoEntry.clsid)"
-                })
-            }
         }
     }
 }

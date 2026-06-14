@@ -44,6 +44,8 @@ param(
 
     [switch]$NoRestorePoint,
 
+    [switch]$IncludeSuspected,
+
     [string]$OutputDir = '',
 
     [string]$DatabasePath = ''
@@ -54,7 +56,7 @@ $ErrorActionPreference = 'Stop'
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 
-$JRT_VERSION  = '1.0.0'
+$JRT_VERSION  = '1.2.0'
 $JRT_REPO     = 'https://github.com/delanderdev/jrtreborn'
 $SCRIPT_ROOT  = $PSScriptRoot
 
@@ -113,8 +115,9 @@ function Request-Elevation {
     if ($Scan)            { $elevArgs += ' -Scan' }
     elseif ($Remove)      { $elevArgs += ' -Remove' }
     elseif ($DryRun)      { $elevArgs += ' -DryRun' }
-    if ($NoRestorePoint)  { $elevArgs += ' -NoRestorePoint' }
-    if ($OutputDir)       { $elevArgs += " -OutputDir `"$($OutputDir -replace '"', '\"')`"" }
+    if ($NoRestorePoint)   { $elevArgs += ' -NoRestorePoint' }
+    if ($IncludeSuspected) { $elevArgs += ' -IncludeSuspected' }
+    if ($OutputDir)        { $elevArgs += " -OutputDir `"$($OutputDir -replace '"', '\"')`"" }
 
     Start-Process powershell -ArgumentList $elevArgs -Verb RunAs
     exit
@@ -168,6 +171,14 @@ function Import-Database {
                     }}
                     'Policies'  { $parsed }
                 }
+
+                # Programs file carries extra detection lists beyond the main array
+                if ($key -eq 'Programs') {
+                    $db['ProgramPublishers'] = $parsed.publishers
+                    $db['ProgramHeuristics'] = $parsed.heuristics
+                    $db['ProgramAllowlist']  = $parsed.heuristic_allowlist
+                    $db['ProgramAppx']       = $parsed.appx_bloatware
+                }
             } catch {
                 Write-Host "  [!] Failed to load database file '$($files[$key])': $_" -ForegroundColor Red
             }
@@ -194,13 +205,14 @@ function Show-InteractiveMenu {
     $choice = (Read-Host).Trim().ToUpper()
     Write-Host ""
 
-    return switch ($choice) {
+    $result = switch ($choice) {
         '1' { 'Scan' }
         '2' { 'Remove' }
         '3' { 'DryRun' }
         'Q' { 'Quit' }
         default { 'Unknown' }
     }
+    return $result
 }
 
 function Confirm-Removal {
@@ -214,6 +226,17 @@ function Confirm-Removal {
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  Proceed with removal? [Y/N]: " -ForegroundColor White -NoNewline
+    $confirm = (Read-Host).Trim().ToUpper()
+    return $confirm -eq 'Y'
+}
+
+function Confirm-Suspected {
+    param([int]$Count)
+
+    Write-Host ""
+    Write-Host "  $Count suspected item(s) were flagged by heuristics." -ForegroundColor Magenta
+    Write-Host "  These MAY include legitimate software — review the list above carefully." -ForegroundColor Magenta
+    Write-Host "  Remove the suspected items too? [y/N]: " -ForegroundColor White -NoNewline
     $confirm = (Read-Host).Trim().ToUpper()
     return $confirm -eq 'Y'
 }
@@ -261,6 +284,10 @@ Write-Host ""
 
 $detected = Invoke-FullScan -Database $db
 
+# Split detections by confidence. Items without a Severity are treated as Known.
+$knownItems     = @($detected | Where-Object { -not $_.Severity -or $_.Severity -eq 'Known' })
+$suspectedItems = @($detected | Where-Object { $_.Severity -eq 'Suspected' })
+
 Write-Host ""
 Write-Host "  ── RESULTS ──────────────────────────────────────────────────" -ForegroundColor DarkCyan
 Write-Host ""
@@ -269,34 +296,53 @@ if ($detected.Count -eq 0) {
     Write-Host "  [✓] No junkware detected. Your system appears clean!" -ForegroundColor Green
     Write-Host ""
 } else {
-    Write-Host "  Found $($detected.Count) item(s):" -ForegroundColor Yellow
+    Write-Host "  Found $($detected.Count) item(s): $($knownItems.Count) known, $($suspectedItems.Count) suspected" -ForegroundColor Yellow
     Write-Host ""
-    $grouped = $detected | Group-Object -Property Type
-    foreach ($group in $grouped) {
-        Write-Host "    $($group.Name) ($($group.Count)):" -ForegroundColor DarkYellow
-        foreach ($item in $group.Group) {
-            Write-Host "      • $($item.Name)" -ForegroundColor Gray
+
+    if ($knownItems.Count -gt 0) {
+        foreach ($group in ($knownItems | Group-Object -Property Type)) {
+            Write-Host "    $($group.Name) ($($group.Count)):" -ForegroundColor DarkYellow
+            foreach ($item in $group.Group) {
+                Write-Host "      • $($item.Name)" -ForegroundColor Gray
+            }
         }
+        Write-Host ""
     }
-    Write-Host ""
+
+    if ($suspectedItems.Count -gt 0) {
+        Write-Host "    SUSPECTED ($($suspectedItems.Count)) — heuristic matches, may include legitimate software:" -ForegroundColor Magenta
+        foreach ($item in $suspectedItems) {
+            Write-Host "      • $($item.Name)" -ForegroundColor Gray -NoNewline
+            Write-Host "  — $($item.Description)" -ForegroundColor DarkGray
+        }
+        Write-Host ""
+        Write-Host "    These are NOT removed unless you explicitly confirm." -ForegroundColor DarkMagenta
+        Write-Host ""
+    }
 }
 
 # Remove if requested
-$summary = @{ Found = $detected.Count; Removed = 0; Errors = 0 }
+$summary = @{ Found = $detected.Count; Removed = 0; Errors = 0; Skipped = 0; Suspected = $suspectedItems.Count }
+$includeSuspected = [bool]$IncludeSuspected
 
 if ($detected.Count -gt 0 -and ($mode -eq 'Remove' -or $mode -eq 'DryRun')) {
 
     $isDryRun = ($mode -eq 'DryRun')
 
-    if (-not $isDryRun) {
-        # Interactive mode confirmation
-        if ($PSCmdlet.ParameterSetName -eq 'Interactive') {
-            if (-not (Confirm-Removal -Count $detected.Count)) {
-                Write-Host ""
-                Write-Host "  Removal cancelled. No changes were made." -ForegroundColor DarkGray
-                Write-Host ""
-                $mode = 'Scan'
-            }
+    if (-not $isDryRun -and $PSCmdlet.ParameterSetName -eq 'Interactive') {
+        # Confirm known removals first; suspected items get a separate opt-in.
+        $proceed = $true
+        if ($knownItems.Count -gt 0) {
+            $proceed = Confirm-Removal -Count $knownItems.Count
+        }
+        if ($proceed -and $suspectedItems.Count -gt 0) {
+            $includeSuspected = Confirm-Suspected -Count $suspectedItems.Count
+        }
+        if (-not $proceed) {
+            Write-Host ""
+            Write-Host "  Removal cancelled. No changes were made." -ForegroundColor DarkGray
+            Write-Host ""
+            $mode = 'Scan'
         }
     }
 
@@ -311,8 +357,9 @@ if ($detected.Count -gt 0 -and ($mode -eq 'Remove' -or $mode -eq 'DryRun')) {
         Write-Host ""
         Write-Host "  ── REMOVAL ──────────────────────────────────────────────────" -ForegroundColor DarkCyan
         Write-Host ""
-        $summary = Invoke-RemoveAll -DetectedItems $detected -DryRun:$isDryRun
+        $summary = Invoke-RemoveAll -DetectedItems $detected -DryRun:$isDryRun -IncludeSuspected:$includeSuspected
         $summary.Found = $detected.Count
+        $summary.Suspected = $suspectedItems.Count
     }
 }
 
@@ -332,6 +379,9 @@ Write-Host ""
 $line = '─' * 60
 Write-Host "  $line" -ForegroundColor DarkGray
 Write-Host ("  {0,-30} {1,5}" -f "Items found:",   $summary.Found)   -ForegroundColor White
+if ($summary.ContainsKey('Suspected') -and $summary.Suspected -gt 0) {
+    Write-Host ("  {0,-30} {1,5}" -f "Items suspected:", $summary.Suspected) -ForegroundColor Magenta
+}
 Write-Host ("  {0,-30} {1,5}" -f "Items removed:",  $summary.Removed) -ForegroundColor Green
 if ($summary.Errors -gt 0) {
     Write-Host ("  {0,-30} {1,5}" -f "Errors:", $summary.Errors) -ForegroundColor Red

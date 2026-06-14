@@ -3,7 +3,8 @@
 function Invoke-RemoveAll {
     param(
         [System.Collections.Generic.List[hashtable]]$DetectedItems,
-        [switch]$DryRun
+        [switch]$DryRun,
+        [switch]$IncludeSuspected
     )
 
     $summary = @{ Found = $DetectedItems.Count; Removed = 0; Errors = 0; Skipped = 0 }
@@ -16,13 +17,21 @@ function Invoke-RemoveAll {
     Write-Host ""
 
     # Order matters: kill processes first, then stop services, then remove everything else
-    $order = @('Process', 'Service', 'Task', 'Program', 'RegistryKey', 'RegistryValue',
+    $order = @('Process', 'Service', 'Task', 'Program', 'AppxPackage', 'RegistryKey', 'RegistryValue',
                 'Folder', 'File', 'StartupFile', 'BrowserHijack', 'BrowserExtension', 'IEBho',
                 'PolicyExtension', 'PolicyOverride')
 
     foreach ($type in $order) {
         $items = $DetectedItems | Where-Object { $_.Type -eq $type }
         foreach ($item in $items) {
+            # Safeguard: heuristic 'Suspected' detections are never auto-removed
+            # unless the caller explicitly opted in (interactive confirm or -IncludeSuspected).
+            $severity = if ($item.Severity) { $item.Severity } else { 'Known' }
+            if ($severity -eq 'Suspected' -and -not $IncludeSuspected) {
+                Write-LogEntry -Category 'SKIPPED' -Message "Skipped (suspected, not confirmed): $($item.Name)"
+                $summary.Skipped++
+                continue
+            }
             $result = Remove-Item_Safe -Item $item -DryRun:$DryRun
             if ($result -eq 'removed') { $summary.Removed++ }
             elseif ($result -eq 'error') { $summary.Errors++ }
@@ -44,6 +53,7 @@ function Remove-Item_Safe {
             'Service'          { return Remove-JunkService   -Item $Item -DryRun:$DryRun }
             'Task'             { return Remove-JunkTask      -Item $Item -DryRun:$DryRun }
             'Program'          { return Remove-JunkProgram   -Item $Item -DryRun:$DryRun }
+            'AppxPackage'      { return Remove-AppxJunk      -Item $Item -DryRun:$DryRun }
             'RegistryKey'      { return Remove-RegKey        -Item $Item -DryRun:$DryRun }
             'RegistryValue'    { return Remove-RegValue      -Item $Item -DryRun:$DryRun }
             'Folder'           { return Remove-JunkFolder    -Item $Item -DryRun:$DryRun }
@@ -203,6 +213,37 @@ function Remove-JunkProgram {
         }
     } catch {
         Write-LogEntry -Category 'ERROR' -Message "Uninstall failed for '$($app.DisplayName)': $($_.Exception.Message)"
+        return 'error'
+    }
+}
+
+# ─── Appx / MSIX Package Removal ─────────────────────────────────────────────
+
+function Remove-AppxJunk {
+    param([hashtable]$Item, [switch]$DryRun)
+
+    $pkgFull = $Item.Data.PackageFullName
+    if (-not $pkgFull) {
+        Write-LogEntry -Category 'WARNING' -Message "No package identity for Appx item: $($Item.Name)"
+        return 'skipped'
+    }
+
+    if ($DryRun) {
+        Write-LogEntry -Category 'INFO' -Message "[DryRun] Would remove Appx package: $($Item.Name)"
+        return 'skipped'
+    }
+
+    if (-not (Get-Command Remove-AppxPackage -ErrorAction SilentlyContinue)) {
+        Write-LogEntry -Category 'WARNING' -Message "Remove-AppxPackage not available; cannot remove: $($Item.Name)"
+        return 'error'
+    }
+
+    try {
+        Remove-AppxPackage -Package $pkgFull -ErrorAction Stop
+        Write-LogEntry -Category 'REMOVED' -Message "Removed Appx package: $($Item.Name)"
+        return 'removed'
+    } catch {
+        Write-LogEntry -Category 'ERROR' -Message "Failed to remove Appx package '$($Item.Name)': $($_.Exception.Message)"
         return 'error'
     }
 }
