@@ -51,12 +51,16 @@ param(
     [string]$DatabasePath = ''
 )
 
-Set-StrictMode -Version Latest
+# StrictMode 1.0 (not Latest): the scanner and remover deliberately read optional
+# properties off dynamic objects (registry items, parsed JSON, COM results) that are
+# frequently absent. Under -Version Latest, reading a missing property is a TERMINATING
+# error, which crashed the tool mid-scan. 1.0 still catches uninitialized variables.
+Set-StrictMode -Version 1.0
 $ErrorActionPreference = 'Stop'
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 
-$JRT_VERSION  = '1.2.0'
+$JRT_VERSION  = '1.2.2'
 $JRT_REPO     = 'https://github.com/delanderdev/jrtreborn'
 $SCRIPT_ROOT  = $PSScriptRoot
 
@@ -71,6 +75,49 @@ if (-not $OutputDir) {
 
 if (-not (Test-Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+}
+
+# ─── Diagnostic logging + fatal-error trap ───────────────────────────────────
+# Records a full session transcript and, on any unhandled terminating error,
+# writes a detailed crash report to a file and keeps the window open so the
+# error can be read and reported. Essential for the .exe build, whose window
+# would otherwise close instantly on a crash.
+
+$script:JRT_Stamp        = Get-Date -Format 'yyyyMMdd_HHmmss'
+$script:JRT_ErrorLog     = Join-Path $OutputDir ("JRTreborn_ERROR_{0}.log" -f $script:JRT_Stamp)
+$script:JRT_Transcript   = Join-Path $OutputDir ("JRTreborn_session_{0}.log" -f $script:JRT_Stamp)
+$script:JRT_TranscriptOn = $false
+try {
+    Start-Transcript -Path $script:JRT_Transcript -Force -ErrorAction Stop | Out-Null
+    $script:JRT_TranscriptOn = $true
+} catch { }
+
+trap {
+    $e = $_
+    $report = @"
+==================== JRTreborn FATAL ERROR ====================
+Time     : $(Get-Date)
+Version  : $JRT_VERSION
+Message  : $($e.Exception.Message)
+Type     : $($e.Exception.GetType().FullName)
+Category : $($e.CategoryInfo.Category)
+Location : $($e.InvocationInfo.ScriptName):$($e.InvocationInfo.ScriptLineNumber)
+Command  : $($e.InvocationInfo.MyCommand)
+Line     : $(($e.InvocationInfo.Line).Trim())
+--- Script stack trace ---
+$($e.ScriptStackTrace)
+===============================================================
+"@
+    try { $report | Out-File -FilePath $script:JRT_ErrorLog -Encoding UTF8 -Force } catch { }
+    Write-Host ""
+    Write-Host $report -ForegroundColor Red
+    Write-Host "  A crash report was saved to:" -ForegroundColor Yellow
+    Write-Host "    $script:JRT_ErrorLog" -ForegroundColor Yellow
+    Write-Host "  Please send that file to the developer so the issue can be fixed." -ForegroundColor Yellow
+    Write-Host ""
+    if ($script:JRT_TranscriptOn) { try { Stop-Transcript | Out-Null } catch { } }
+    try { Read-Host "  Press Enter to close" | Out-Null } catch { }
+    exit 1
 }
 
 # ─── Load modules ────────────────────────────────────────────────────────────
@@ -403,4 +450,12 @@ if ($detected.Count -gt 0 -and (Test-Path $reportPaths.Html)) {
     try {
         Start-Process $reportPaths.Html -ErrorAction SilentlyContinue
     } catch { }
+}
+
+# ─── Graceful close ──────────────────────────────────────────────────────────
+if ($script:JRT_TranscriptOn) { try { Stop-Transcript | Out-Null } catch { } }
+# Keep the window open after an interactive run so results stay visible (the .exe
+# launches its own console window that would otherwise vanish on completion).
+if ($PSCmdlet.ParameterSetName -eq 'Interactive') {
+    try { Read-Host "  Press Enter to close" | Out-Null } catch { }
 }
