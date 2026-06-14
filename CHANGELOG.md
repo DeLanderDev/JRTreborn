@@ -32,6 +32,20 @@ All notable changes to JRTreborn will be documented here.
 
 ---
 
+## [1.2.2] - 2026-06-14
+
+### Critical Fixes — exe crashed instantly on launch
+- **StrictMode was too aggressive** — the tool ran under `Set-StrictMode -Version Latest`, which makes *any* read of a non-existent property a terminating error. The scanner and remover intentionally read optional properties off dynamic objects (registry uninstall entries without a `DisplayName`, parsed browser-preference JSON without a `homepage`, service entries without a `display`, uninstall entries without a `QuietUninstallString`, …). On a real machine the first missing property crashed the whole script mid-scan. Lowered to `Set-StrictMode -Version 1.0`, which still catches uninitialized variables but allows flexible property access on dynamic data
+- **Elevation re-launch crashed the exe** — the standalone tried to re-elevate via `Start-Process ... -Verb RunAs` on the temp `.ps1`, but the launcher deletes that temp file the instant PowerShell exits, so the elevated child opened a missing file and died. The exe's UAC manifest already guarantees admin, so `Merge-Script.ps1` now strips the elevation call-site from the standalone build
+- **Launcher window vanished** — switched the C# launcher to `UseShellExecute = true` so PowerShell gets a real, persistent console window with working interactive prompts; launch errors now surface in a MessageBox
+- **Orphaned `$dbVersion`** — the standalone build left a `Write-Host "Database version: $dbVersion"` after stripping the variable's assignment; under StrictMode this crashed on launch. Now removed during merge
+
+### Diagnostics
+- The tool now writes a full **session transcript** and, on any unhandled error, a detailed **crash report** (`JRTreborn_ERROR_*.log` in the output dir / Desktop) with the message, type, file/line, and script stack trace — then keeps the window open. Future issues are reportable instead of a window that closes too fast to read
+- Interactive runs now pause ("Press Enter to close") on completion so results stay visible
+
+---
+
 ## [1.1.0] - 2026-06-13
 
 ### Build System
