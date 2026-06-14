@@ -4,6 +4,34 @@ All notable changes to JRTreborn will be documented here.
 
 ---
 
+## [1.2.0] - 2026-06-13
+
+### Build System
+- Replaced `ps2exe` with a native C# launcher (`build/Launcher.cs` + `build/Launcher.manifest`) compiled via `csc.exe` — no PowerShell Gallery dependency in CI and no ps2exe heuristic AV fingerprint. The exe embeds the standalone script as compressed base64, extracts it to a temp file at runtime, runs it elevated (UAC via manifest), and cleans up on exit
+
+### Detection Database v1.2.0 (curated expansion)
+- **browsers.json** (+61 homepage hijackers): searchmine, searchbaron, searchmarquis, coolwebsearch, omiga-plus, holasearch, searchgol, mixidj, anysearchmanager, dosearches, Mindspark hijack domains (mapsgalaxy, televisionfanatic, pdfconverterhq, weatherblink, packtrackplus, etc.) and more
+- **programs.json** (+39): Yontoo, Superfish, PremierOpinion, OpenCandy, InstallCore, DealPly, Linkury/SmartBar, Wajam, Mobogenie, Baidu PC Faster, PriceMeter, SavingsBull, eFast, BoBrowser, OptimizerPro, RegClean Pro, SlimCleaner, and Mindspark toolbar variants
+- **registry.json** (+21): vendor keys and Run values for Yontoo, Superfish, Linkury, SmartBar, DealPly, InstallCore, Amonetize, PriceMeter, SavingsBull, Mobogenie, Baidu, eFast, BoBrowser, Systweak, OptimizerPro, WebDiscover, Wajam, DNS Unlocker
+- Note: extension IDs and BHO CLSIDs were intentionally **not** bulk-expanded — unverified identifiers in a removal tool risk deleting legitimate browser extensions
+
+### Program Scan — Coverage Engine
+- **Publisher-based detection** — `programs.json` now has a `publishers` list; a single rule (e.g. "Mindspark Interactive Network", "Conduit", "Spigot") matches every product from that vendor, current and future
+- **Field-broadened matching** — distinctive program patterns (≥5 chars) now also match the install location, not just the display name
+- **Heuristic "Suspected" tier** — generic PUP-category patterns ("Driver Updater", "Registry Cleaner", "PC Optimizer", "Toolbar", "Coupon", …) flag unknown programs as low-confidence *Suspected*. Suspected items are shown separately, **never auto-removed**, and require explicit confirmation (interactive prompt) or the new `-IncludeSuspected` switch
+- **Trusted-vendor allowlist** — a publisher allowlist (Microsoft, Intel, NVIDIA, Dell, Google, Mozilla, …) globally suppresses detections for legitimate software, applied to *every* route including known signatures
+- **Appx/MSIX scan** — `Get-AppxPackage` enumeration flags known Store bloatware (Candy Crush, etc.) as Suspected, removable via `Remove-AppxPackage`
+- **Signature enrichment** — Suspected items note when their main binary is unsigned/untrusted
+- Reports and the console now separate **Known** vs **Suspected** detections, with a new `SUSPECT` log category and HTML styling
+
+### Bug Fixes (pre-existing, surfaced by PowerShell AST validation)
+- **Browser group-policy scanner never ran** — `Invoke-PolicyScan` was accidentally nested inside `Invoke-BrowserScan` (brace mismatch), so it was out of scope when called and the v1.1.0 policy feature silently did nothing. Lifted to a top-level function
+- **Main script could not parse** — `Show-InteractiveMenu` used `return switch {…}`, which is invalid PowerShell; the interactive menu (and thus the whole script) failed to load. Changed to assign-then-return
+- **Standalone build produced an invalid script** — the merge inlined the main script's `[CmdletBinding()] param()` block mid-file, where `param` is illegal. `Merge-Script.ps1` now hoists it to the top of the standalone
+- **Over-broad signature** — the `DriverUpdate` rule matched `"Driver Update"`, flagging any "…Driver Updater" (including legitimate OEM tools) as known junkware; narrowed to Slimware-specific patterns so generic ones fall through to the Suspected tier
+
+---
+
 ## [1.1.0] - 2026-06-13
 
 ### Build System
