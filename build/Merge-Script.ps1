@@ -167,6 +167,13 @@ $mainScript = $mainScript -replace '(?m)^\$dbVersion.*?\r?\n', "Write-Host `"  D
 # terminating error that crashes the standalone on launch. Drop the orphan line.
 $mainScript = $mainScript -replace '(?m)^Write-Host "  Database version:.*?\r?\n', ''
 
+# Remove the elevation re-launch block — the exe's UAC manifest (requireAdministrator)
+# guarantees the process is already elevated before PowerShell starts. Attempting
+# to re-elevate causes Start-Process to try running the temp .ps1 that the launcher
+# deletes in its finally block, so the elevated child finds a missing file and crashes.
+$mainScript = $mainScript -replace '(?m)^# Elevation\r?\n', ''
+$mainScript = $mainScript -replace '(?ms)^if \(-not \(Test-AdminPrivilege\)\) \{.*?^\}\r?\n', ''
+
 # ─── Hoist the [CmdletBinding()]/param() block to the top of the standalone ──
 # A param() block must be the first statement in a script. When the main script
 # is inlined after the embedded database and source modules, its param block
