@@ -162,6 +162,10 @@ $mainScript = $mainScript -replace '(?s)# ─── Database loader.*?^}(\r?\n)'
 # Remove the $dbVersionFile / $dbVersion lines that read from the filesystem
 $mainScript = $mainScript -replace '(?m)^\$dbVersionFile.*?\r?\n', ''
 $mainScript = $mainScript -replace '(?m)^\$dbVersion.*?\r?\n', "Write-Host `"  Database: embedded (standalone build)`" -ForegroundColor DarkGray`n"
+# The follow-up "Database version: $dbVersion" line now references an undefined
+# variable (its assignment was removed above); under Set-StrictMode that is a
+# terminating error that crashes the standalone on launch. Drop the orphan line.
+$mainScript = $mainScript -replace '(?m)^Write-Host "  Database version:.*?\r?\n', ''
 
 # ─── Hoist the [CmdletBinding()]/param() block to the top of the standalone ──
 # A param() block must be the first statement in a script. When the main script
