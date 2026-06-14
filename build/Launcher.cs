@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 [assembly: AssemblyTitle("JRTreborn")]
@@ -25,6 +26,9 @@ using System.Text;
 
 class Program
 {
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    static extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);
+
     // GZip-compressed, base64-encoded standalone PowerShell script.
     // Substituted by Build-Exe.ps1 before compilation.
     private const string EmbeddedScript = "###EMBEDDED_SCRIPT###";
@@ -39,9 +43,10 @@ class Program
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine("JRTreborn: launch error — " + ex.Message);
-            Console.Error.WriteLine("Press any key to exit.");
-            try { Console.ReadKey(true); } catch { }
+            MessageBox(IntPtr.Zero,
+                "JRTreborn failed to start:\n\n" + ex.Message,
+                "JRTreborn – Launch Error",
+                0x10 /* MB_ICONERROR */);
             return 1;
         }
         finally
@@ -92,9 +97,12 @@ class Program
 
         var psi = new ProcessStartInfo
         {
-            FileName  = "powershell.exe",
-            Arguments = psArgs.ToString(),
-            UseShellExecute = false,
+            FileName        = "powershell.exe",
+            Arguments       = psArgs.ToString(),
+            // UseShellExecute = true lets PowerShell inherit the existing console
+            // window (or have Windows create one) so the interactive menu, colours,
+            // and Read-Host prompts all work correctly.
+            UseShellExecute = true,
         };
 
         using (var proc = Process.Start(psi))
